@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>{% block title %}Login{% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="https://www.santafe.gob.ar/assets/standard/images/favicon.ico">
+
+    <!-- css custom theme -->
+    <link rel="stylesheet" href="https://www.santafe.gob.ar/assets/app/stg-theme/css/custom-v012020.css" type="text/css" />
+    <link rel="stylesheet" href="https://www.santafe.gob.ar/assets/standard/css/fonts.css" type="text/css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <script src="https://www.santafe.gob.ar/assets/jquery/jquery-v3.2.1/jquery.min.js" ></script>
+    <script src="https://www.santafe.gob.ar/assets/popper/popper-v1.12.9/popper.min.js" ></script>
+    <script src="https://www.santafe.gob.ar/assets/bootstrap/bootstrap-v4.0.0/js/bootstrap.min.js"></script>
+
+    {% block head %}{% endblock %}
+    <style>
+        /* small helper to center login */
+        .login-outer { min-height: 100vh; display:flex; align-items:center; justify-content:center; }
+    </style>
+</head>
+<body>
+    <div class="login-outer">
+        <div class="container">
+            {% block body %}{% endblock %}
+        </div>
+    </div>
+
+    {% block footerScripts %}{% endblock %}
+</body>
+</html>

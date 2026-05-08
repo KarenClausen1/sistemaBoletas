@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Sistema de Gestión de Boletas</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="https://www.santafe.gob.ar/assets/standard/images/favicon.ico">
+
+    <!-- css custom theme -->
+    <link rel="stylesheet" href="https://www.santafe.gob.ar/assets/app/stg-theme/css/custom-v012020.css" type="text/css" />
+    <!-- assets fonts -->
+    <link rel="stylesheet" href="https://www.santafe.gob.ar/assets/standard/css/fonts.css" type="text/css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <script src="https://www.santafe.gob.ar/assets/jquery/jquery-v3.2.1/jquery.min.js" ></script>
+    <script src="https://www.santafe.gob.ar/assets/popper/popper-v1.12.9/popper.min.js" ></script>
+    <script src="https://www.santafe.gob.ar/assets/bootstrap/bootstrap-v4.0.0/js/bootstrap.min.js"></script>
+
+    {% block head %}{% endblock %}
+</head>
+
+
+<body>
+<nav class="navbar navbar-expand-md navbar-light fixed-top">
+    <a class="navbar-brand" href="https://www.santafe.gov.ar/index.php/web"><img
+                src="https://www.santafe.gob.ar/assets/standard/images/gob-santafe.png"></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+            aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        {% block menu %}
+            {% include 'menu.html.twig' %}
+        {% endblock %}
+    </div>
+</nav>
+
+<main role="main" class="container col-sm-12 col-md-6 col-md-pull-6">
+
+    <div class="row row-top">
+        <div class="col-lg-12">
+            {% block headTitle %}
+                <h1>Sistema de Gestion de Boletas</h1>
+            {% endblock %}
+            <p>Fiscalía de Estado de la Provincia de Santa Fe</p>
+        </div>
+    </div>
+    {% for message in app.flashes('exito') %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error!</strong> {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('alerta') %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>Alerta!</strong> {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endfor %}
+    {% block header %}{% endblock %}
+
+    <div class="row ">
+        <div class="col-lg-12">
+            <div class="card bg-light mb-12">
+                <div class="card-header">
+                    Ingreso
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% if error %}
+                            <div class="alert alert-danger">
+                                {{ error }}
+                            </div>
+                        {% endif %}
+
+                        {# {% if app.user %}
+                            <div class="mb-3">
+                                Ya estas logeado como {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Salir</a>
+                            </div>
+                        {% endif %}#}
+
+                        {#<h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>#}
+
+                        <div class="form-group">
+                            <label for="inputUsername">DNI</label>
+                            <input type="text" value="{{ last_username }}" name="dni" id="inputUsername" class="form-control" autocomplete="dni" required autofocus>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inputPassword">Clave</label>
+                            <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required>
+                        </div>
+
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}" >
+                        <br>
+                        <div class="form-group">
+                            <button class="btn btn-primary" type="submit">
+                                Ingresar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {% block cardFooter %}
+                {% endblock %}
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <p class="float-right">
+                <a href="#"><i class="material-icons">keyboard_arrow_up</i></a>
+            </p>
+        </div>
+    </div>
+</main>
+
+
+
+
+
+{% block footer %}
+    {% include 'footer.html.twig' %}
+{% endblock %}
+
+</body>
+</html>

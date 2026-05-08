@@ -1,0 +1,14 @@
+{% extends "bootstrap_4_layout.html.twig" %}
+
+{# --- BURBUJA DE ERROR --- #}
+{% block form_errors %}
+    {% if errors|length > 0 %}
+        <div class="error-bubble">
+            {% for error in errors %}
+                <div class="error-bubble-item">
+                    {{ error.message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

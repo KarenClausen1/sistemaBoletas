@@ -1,0 +1,88 @@
+{% extends 'base.html.twig' %}
+
+{% block head %}
+    <script src="{{ asset('js/functions.js') }}"></script>
+    <script src="{{ asset('js/boleta.js') }}"></script>
+{% endblock %}
+
+{% block title %}Nueva Boleta{% endblock %}
+
+{% block body %}
+
+{{ form_start(form, { 'attr': {'onsubmit':'return validBoletaForm();','class': 'needs-validation'} }) }}
+
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+{% endfor %}
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+{% endfor %}
+
+{# Primera fila: número_boleta / expediente / fecha vencimiento #}
+<div class="row mb-3 align-items-start">
+    <div class="col-md-4">
+        <div class="form-group">
+            {{ form_label(form.numeroBoleta) }}
+            {{ form_widget(form.numeroBoleta, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.numeroBoleta) }}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            {{ form_label(form.expediente) }}
+            {{ form_widget(form.expediente, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.expediente) }}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            {{ form_label(form.fechaVencimiento) }}
+            {{ form_widget(form.fechaVencimiento, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.fechaVencimiento) }}
+        </div>
+    </div>
+</div>
+
+{# Segunda fila: profesional / email / observaciones #}
+<div class="row mb-3 align-items-start">
+    <div class="col-md-4">
+        <div class="form-group">
+            {{ form_label(form.profesional) }}
+            {{ form_widget(form.profesional, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.profesional) }}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            {{ form_label(form.emailProfesional) }}
+            {{ form_widget(form.emailProfesional, {'attr': {'class': 'form-control', 'type': 'email'}}) }}
+            {{ form_errors(form.emailProfesional) }}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            {{ form_label(form.observaciones) }}
+            {{ form_widget(form.observaciones, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.observaciones) }}
+        </div>
+    </div>
+</div>
+
+<div class="text-end mt-4">
+    <a href="{{ path('boleta_index') }}" class="btn btn-outline-secondary">Cancelar</a>
+    <button type="submit" class="btn btn-primary">{{ boleta and boleta.id ? 'Actualizar' : 'Guardar' }}</button>
+</div>
+
+{{ form_end(form) }}
+
+{% endblock %}

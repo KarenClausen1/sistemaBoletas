@@ -1,0 +1,139 @@
+{% extends 'base.html.twig' %}
+
+{# Usamos el título por defecto del layout; evitar poner 'Boletas' suelto en el body. #}
+
+{% block body %}
+
+    <div class="text-center">
+        <h2 class="font-weight-bold text-info">
+            Bienvenido al Sistema
+        </h2>
+
+        <p class="text-muted">
+            Gestione y consulte sus boletas de forma rápida y sencilla.
+        </p>
+    </div>
+
+    {# Centrar horizontal y verticalmente las opciones principales #}
+    <div class="row justify-content-center align-items-center">
+
+        <!-- Crear nueva boleta -->
+        <div class="col-md-4 d-flex">
+            <div class="card mb-3 border-success no-hover w-100">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+
+                    <i class="material-icons md-48 text-success mb-2">
+                        note_add
+                    </i>
+
+                    <p class="card-text">
+                        Cargá una nueva boleta en el sistema.
+                    </p>
+
+                    <div>
+                        <a href="{{ path('boleta_nueva') }}"
+                           class="btn btn-success btn-sm">
+                            Crear
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Buscar boletas -->
+        <div class="col-md-4 d-flex">
+            <div class="card mb-3 border-info no-hover w-100">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+
+                    <i class="material-icons md-48 text-info mb-2">
+                        search
+                    </i>
+
+                    <p class="card-text">
+                        Buscar BOLETAS.
+                    </p>
+
+                    <div>
+                        <a href="{{ path('boleta_index') }}"
+                           class="btn btn-outline-primary btn-sm">
+                            Buscar
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {% set sessionUser = app.session.get('usuario') %}
+    {% set sessionUsername = sessionUser.username|default(null) %}
+    {% set sessionRoles = sessionUser.roles|default([]) %}
+    {% set isAdmin = 'ROLE_ADMIN' in sessionRoles %}
+
+    <div class="mb-3 d-flex justify-content-between">
+        <div>
+            {# Filtro simple por estado #}
+            <form method="get" action="{{ path('boleta_index') }}" class="form-inline">
+                <select name="estado" class="form-control">
+                    <option value="todos">Todos</option>
+                    {% for label, val in estados %}
+                        <option value="{{ val }}" {% if estado == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <input type="text" name="q" value="{{ busqueda }}" placeholder="Buscar..." class="form-control ml-2" />
+                <button class="btn btn-outline-primary ml-2">Filtrar</button>
+            </form>
+        </div>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>N° Boleta</th>
+                <th>Profesional</th>
+                <th>Estado</th>
+                <th>Creada por</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for boleta in boletas %}
+                <tr>
+                    <td>{{ boleta.id }}</td>
+                    <td>{{ boleta.numeroBoleta }}</td>
+                    <td>{{ boleta.profesional }}</td>
+                    <td>{{ boleta.getEstadoLabel() }}</td>
+                    <td>{{ boleta.createdBy ?: '—' }}</td>
+                    <td>
+                        {% if sessionUsername and (boleta.createdBy == sessionUsername or isAdmin) %}
+                            <a href="{{ path('boleta_editar', {'id': boleta.id}) }}" class="btn btn-sm btn-primary">Editar</a>
+                            <form action="{{ path('boleta_eliminar', {'id': boleta.id}) }}" method="post" style="display:inline" onsubmit="return confirm('¿Confirma eliminar la boleta?');">
+                                <button class="btn btn-sm btn-danger">Eliminar</button>
+                            </form>
+                        {% endif %}
+
+                        {# Cambio de estado (solo admin) #}
+                        {% if isAdmin %}
+                            <form action="{{ path('boleta_estado', {'id': boleta.id}) }}" method="post" style="display:inline; margin-left:6px">
+                                <select name="estado" class="form-control form-control-sm" onchange="this.form.submit()">
+                                    {% for label, val in estados %}
+                                        <option value="{{ val }}" {% if boleta.estado == val %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="hidden" name="filtro_estado" value="{{ estado }}" />
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6">No hay boletas.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

@@ -1,0 +1,27 @@
+# Security configuration disabled — using manual session-based authentication with App\Entity\Usuario
+# If you want to enable Symfony SecurityBundle later, restore the contents below and enable the bundle in config/bundles.php
+
+# Example (do not uncomment unless SecurityBundle is registered):
+# security:
+#     password_hashers:
+#         App\Entity\User: 'auto'
+#     providers:
+#         app_user_provider:
+#             entity:
+#                 class: App\Entity\User
+#                 property: username
+#     firewalls:
+#         dev:
+#             pattern: ^/(_(profiler|wdt)|css|images|js)/
+#             security: false
+#         main:
+#             anonymous: lazy
+#             provider: app_user_provider
+#             form_login:
+#                 login_path: app_login
+#                 check_path: app_login
+#             logout:
+#                 path: app_logout
+#                 target: /
+#     access_control:
+#         - { path: ^/boletas, roles: ROLE_USER
