@@ -11,62 +11,137 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\HasLifecycleCallbacks]
 class Boleta
 {
-    public const ESTADO_PENDIENTE  = 'pendiente';
+    // =====================================================
+    // ESTADOS
+    // =====================================================
+
+    public const ESTADO_PENDIENTE = 'pendiente';
     public const ESTADO_PAGADA = 'pagada';
-    public const ESTADO_SUBIDA = 'subida';
-    public const ESTADO_DETENIDA = 'detenida';
+    public const ESTADO_VENCIDA = 'vencida';
+
+    // =====================================================
+    // ESTADOS DISPONIBLES
+    // =====================================================
 
     public const ESTADOS = [
-        'Pendiente'  => self::ESTADO_PENDIENTE,  //solo se cargo a la web
-        'Pagada'     => self::ESTADO_PAGADA,     //se pago pero no se subio a drive
-        'Subida'     => self::ESTADO_SUBIDA,     //se pago y se subio al drive
-        'Detenida'   => self::ESTADO_DETENIDA,   //se pago pero se detuvo por algun motivo (ej: falta de datos, error en el pago, etc)
+        'Pendiente' => self::ESTADO_PENDIENTE,
+        'Pagada' => self::ESTADO_PAGADA,
+        'Vencida' => self::ESTADO_VENCIDA,
     ];
+
+    // =====================================================
+    // COMPATIBILIDAD LEGACY
+    // =====================================================
+
+    public const ESTADOS_LEGACY = [
+        'en_proceso' => self::ESTADO_PENDIENTE,
+        'detenida' => self::ESTADO_PENDIENTE,
+        'subida' => self::ESTADO_PAGADA,
+        'comprobante_subido' => self::ESTADO_PAGADA,
+        'finalizada' => self::ESTADO_PAGADA,
+    ];
+
+    // =====================================================
+    // LABELS
+    // =====================================================
+
+    private const ESTADOS_LABELS = [
+        self::ESTADO_PENDIENTE => 'Pendiente',
+        self::ESTADO_PAGADA => 'Pagada',
+        self::ESTADO_VENCIDA => 'Vencida',
+    ];
+
+    // =====================================================
+    // BADGES
+    // =====================================================
+
+    private const ESTADO_BADGES = [
+        self::ESTADO_PENDIENTE => 'badge-warning text-dark',
+        self::ESTADO_PAGADA => 'badge-success',
+        self::ESTADO_VENCIDA => 'badge-danger',
+    ];
+
+    // =====================================================
+    // ID
+    // =====================================================
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
     private ?int $id = null;
 
+    // =====================================================
+    // DATOS PRINCIPALES
+    // =====================================================
+
     #[ORM\Column(type: Types::STRING, length: 100, unique: true)]
     private string $numeroBoleta;
 
-    #[ORM\Column(type: Types::STRING, length: 13, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 50, nullable: true)]
     private ?string $expediente = null;
 
-    #[ORM\Column(type: Types::STRING, length: 30)]
-    private string $profesional;
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    private ?string $profesional = null;
+
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    private ?string $emailProfesional = null;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $fechaVencimiento = null;
 
-    #[ORM\Column(type: Types::STRING, length: 50)]
-    private ?string $emailProfesional;
-
-    #[ORM\Column(type: Types::STRING, length: 50)]
+    #[ORM\Column(type: Types::STRING, length: 30)]
     private string $estado = self::ESTADO_PENDIENTE;
 
-    #[ORM\Column(type: Types::TEXT)]
-    private ?string $driveLink;
+    // =====================================================
+// ARCHIVOS
+// =====================================================
+
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    private ?string $archivoOriginalNombre = null;
+
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    private ?string $archivoOriginalNombreOriginal = null;
+
+    #[ORM\Column(type: Types::STRING, length: 150, nullable: true)]
+    private ?string $archivoOriginalMimeType = null;
+
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    private ?string $comprobanteNombre = null;
+
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    private ?string $comprobanteNombreOriginal = null;
+
+    #[ORM\Column(type: Types::STRING, length: 150, nullable: true)]
+    private ?string $comprobanteMimeType = null;
+
+// =====================================================
+// OBSERVACIONES
+// =====================================================
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $observaciones = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $createdBy = null;
+// =====================================================
+// FECHAS
+// =====================================================
 
-    // Campos de auditoría: mapeados en la base de datos
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $fechaCreacion;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $fechaActualizacion;
 
+// =====================================================
+// LIFECYCLE CALLBACKS
+// =====================================================
+
     #[ORM\PrePersist]
     public function onPrePersist(): void
     {
-        $this->fechaCreacion      = new \DateTimeImmutable();
-        $this->fechaActualizacion = new \DateTimeImmutable();
+        $ahora = new \DateTimeImmutable();
+
+        $this->fechaCreacion = $ahora;
+        $this->fechaActualizacion = $ahora;
     }
 
     #[ORM\PreUpdate]
@@ -75,41 +150,116 @@ class Boleta
         $this->fechaActualizacion = new \DateTimeImmutable();
     }
 
-    public function getId(): ?int { return $this->id; }
+// =====================================================
+// GETTERS & SETTERS
+// =====================================================
 
-    public function getNumeroBoleta(): string { return $this->numeroBoleta; }
-    public function setNumeroBoleta(string $v): static { $this->numeroBoleta = $v; return $this; }
-
-    public function getExpediente(): ?string { return $this->expediente; }
-    public function setExpediente(?string $v): static { $this->expediente = $v; return $this; }
-
-    public function getProfesional(): string { return $this->profesional; }
-    public function setProfesional(string $v): static { $this->profesional = $v; return $this; }
-
-    public function getFechaVencimiento(): ?\DateTimeImmutable { return $this->fechaVencimiento; }
-    public function setFechaVencimiento(?\DateTimeImmutable $v): static { $this->fechaVencimiento = $v; return $this; }
-
-    public function getEmailProfesional(): ?string { return $this->emailProfesional; }
-    public function setEmailProfesional(?string $v): static { $this->emailProfesional = $v; return $this; }
-
-    public function getEstado(): string { return $this->estado; }
-    public function setEstado(string $v): static { $this->estado = $v; return $this; }
-
-    public function getDriveLink(): ?string { return $this->driveLink; }
-    public function setDriveLink(?string $v): static { $this->driveLink = $v; return $this; }
-
-    public function getObservaciones(): ?string { return $this->observaciones; }
-    public function setObservaciones(?string $v): static { $this->observaciones = $v; return $this; }
-
-    public function getCreatedBy(): ?string { return $this->createdBy; }
-    public function setCreatedBy(?string $createdBy): static { $this->createdBy = $createdBy; return $this; }
-
-    public function getFechaCreacion(): \DateTimeImmutable { return $this->fechaCreacion; }
-    public function getFechaActualizacion(): \DateTimeImmutable { return $this->fechaActualizacion; }
-
-    public function getEstadoLabel(): string
+    public function getArchivoOriginalNombre(): ?string
     {
-        return array_flip(self::ESTADOS)[$this->estado] ?? $this->estado;
+        return $this->archivoOriginalNombre;
     }
-}
 
+    public function setArchivoOriginalNombre(?string $archivoOriginalNombre): static
+    {
+        $this->archivoOriginalNombre = $archivoOriginalNombre;
+
+        return $this;
+    }
+
+    public function getArchivoOriginalNombreOriginal(): ?string
+    {
+        return $this->archivoOriginalNombreOriginal;
+    }
+
+    public function setArchivoOriginalNombreOriginal(?string $archivoOriginalNombreOriginal): static
+    {
+        $this->archivoOriginalNombreOriginal = $archivoOriginalNombreOriginal;
+
+        return $this;
+    }
+
+    public function getArchivoOriginalMimeType(): ?string
+    {
+        return $this->archivoOriginalMimeType;
+    }
+
+    public function setArchivoOriginalMimeType(?string $archivoOriginalMimeType): static
+    {
+        $this->archivoOriginalMimeType = $archivoOriginalMimeType;
+
+        return $this;
+    }
+
+    public function getComprobanteNombre(): ?string
+    {
+        return $this->comprobanteNombre;
+    }
+
+    public function setComprobanteNombre(?string $comprobanteNombre): static
+    {
+        $this->comprobanteNombre = $comprobanteNombre;
+
+        return $this;
+    }
+
+    public function getComprobanteNombreOriginal(): ?string
+    {
+        return $this->comprobanteNombreOriginal;
+    }
+
+    public function setComprobanteNombreOriginal(?string $comprobanteNombreOriginal): static
+    {
+        $this->comprobanteNombreOriginal = $comprobanteNombreOriginal;
+
+        return $this;
+    }
+
+    public function getComprobanteMimeType(): ?string
+    {
+        return $this->comprobanteMimeType;
+    }
+
+    public function setComprobanteMimeType(?string $comprobanteMimeType): static
+    {
+        $this->comprobanteMimeType = $comprobanteMimeType;
+
+        return $this;
+    }
+
+    public function getObservaciones(): ?string
+    {
+        return $this->observaciones;
+    }
+
+    public function setObservaciones(?string $observaciones): static
+    {
+        $this->observaciones = $observaciones;
+
+        return $this;
+    }
+
+    public function getFechaCreacion(): \DateTimeImmutable
+    {
+        return $this->fechaCreacion;
+    }
+
+    public function getFechaActualizacion(): \DateTimeImmutable
+    {
+        return $this->fechaActualizacion;
+    }
+
+// =====================================================
+// HELPERS
+// =====================================================
+
+    public function hasArchivoOriginal(): bool
+    {
+        return !empty($this->archivoOriginalNombre);
+    }
+
+    public function hasComprobante(): bool
+    {
+        return !empty($this->comprobanteNombre);
+    }
+
+}

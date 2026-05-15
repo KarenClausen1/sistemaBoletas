@@ -1,18 +1,20 @@
-{% set sessionUser = app.session.get('usuario') %}
+{% set currentUser = app.user %}
 
 <ul class="navbar-nav mr-auto">
-    <li class="nav-item">
-        <a class="nav-link" href="{{ path('boleta_index') }}">Boletas</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{{ path('boleta_nueva') }}">Nueva boleta</a>
-    </li>
+    {% if currentUser %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ path('boleta_index') }}">Boletas</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ path('boleta_nueva') }}">Nueva boleta</a>
+        </li>
+    {% endif %}
 </ul>
 
 <ul class="navbar-nav ml-auto">
-    {% if sessionUser %}
+    {% if currentUser %}
         <li class="nav-item">
-            <a class="nav-link" href="#">{{ sessionUser.username }}</a>
+            <a class="nav-link" href="#">{{ currentUser.nombreUsuario }}</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="{{ path('app_logout') }}">Salir</a>

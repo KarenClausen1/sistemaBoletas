@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Sistema de Gestión de Boletas</title>
+    <title>Sistema de Gestion de Boletas</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -43,7 +43,7 @@
             {% block headTitle %}
                 <h1>Sistema de Gestion de Boletas</h1>
             {% endblock %}
-            <p>Fiscalía de Estado de la Provincia de Santa Fe</p>
+            <p>Fiscalia de Estado de la Provincia de Santa Fe</p>
         </div>
     </div>
     {% for message in app.flashes('exito') %}
@@ -82,11 +82,11 @@
                     <form method="post">
                         {% if error %}
                             <div class="alert alert-danger">
-                                {{ error }}
+                                {{ error.messageKey is defined ? error.messageKey|trans(error.messageData, 'security') : error }}
                             </div>
                         {% endif %}
 
-                        {# {% if app.user %}
+                       {# {% if app.user %}
                             <div class="mb-3">
                                 Ya estas logeado como {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Salir</a>
                             </div>
@@ -103,6 +103,10 @@
                             <label for="inputPassword">Clave</label>
                             <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required>
                         </div>
+
+                        {% if redirect %}
+                            <input type="hidden" name="redirect" value="{{ redirect }}">
+                        {% endif %}
 
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}" >
                         <br>

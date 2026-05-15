@@ -1,139 +1,248 @@
 {% extends 'base.html.twig' %}
 
-{# Usamos el título por defecto del layout; evitar poner 'Boletas' suelto en el body. #}
-
 {% block body %}
+    <div class="mb-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
+            <div>
+                <h2 class="font-weight-bold text-info mb-1">Bandeja de boletas</h2>
+                <p class="text-muted mb-0">Carga rápida, seguimiento de estados y archivos centralizados en el sistema.</p>
+            </div>
 
-    <div class="text-center">
-        <h2 class="font-weight-bold text-info">
-            Bienvenido al Sistema
-        </h2>
+            {% if is_granted('BOLETA_CREATE') %}
+                <a href="{{ path('boleta_nueva') }}" class="btn btn-success">
+                    <i class="material-icons align-middle" style="font-size:18px">note_add</i>
+                    Nueva boleta
+                </a>
+            {% endif %}
+        </div>
 
-        <p class="text-muted">
-            Gestione y consulte sus boletas de forma rápida y sencilla.
-        </p>
-    </div>
-
-    {# Centrar horizontal y verticalmente las opciones principales #}
-    <div class="row justify-content-center align-items-center">
-
-        <!-- Crear nueva boleta -->
-        <div class="col-md-4 d-flex">
-            <div class="card mb-3 border-success no-hover w-100">
-                <div class="card-body text-center d-flex flex-column justify-content-center">
-
-                    <i class="material-icons md-48 text-success mb-2">
-                        note_add
-                    </i>
-
-                    <p class="card-text">
-                        Cargá una nueva boleta en el sistema.
-                    </p>
-
-                    <div>
-                        <a href="{{ path('boleta_nueva') }}"
-                           class="btn btn-success btn-sm">
-                            Crear
-                        </a>
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <div class="card border-warning no-hover h-100">
+                    <div class="card-body">
+                        <small class="text-muted d-block">Pendientes</small>
+                        <strong class="h3 d-block mb-0">{{ stats.pendiente|default(0) }}</strong>
                     </div>
-
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card border-success no-hover h-100">
+                    <div class="card-body">
+                        <small class="text-muted d-block">Pagadas</small>
+                        <strong class="h3 d-block mb-0">{{ stats.pagada|default(0) }}</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card border-danger no-hover h-100">
+                    <div class="card-body">
+                        <small class="text-muted d-block">Vencidas</small>
+                        <strong class="h3 d-block mb-0">{{ stats.vencida|default(0) }}</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card border-secondary no-hover h-100">
+                    <div class="card-body">
+                        <small class="text-muted d-block">Canceladas</small>
+                        <strong class="h3 d-block mb-0">{{ stats.cancelada|default(0) }}</strong>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Buscar boletas -->
-        <div class="col-md-4 d-flex">
-            <div class="card mb-3 border-info no-hover w-100">
-                <div class="card-body text-center d-flex flex-column justify-content-center">
-
-                    <i class="material-icons md-48 text-info mb-2">
-                        search
-                    </i>
-
-                    <p class="card-text">
-                        Buscar BOLETAS.
-                    </p>
-
-                    <div>
-                        <a href="{{ path('boleta_index') }}"
-                           class="btn btn-outline-primary btn-sm">
-                            Buscar
-                        </a>
+    {% if can_manage_boletas %}
+        <div class="mb-4">
+            <h4 class="mb-3">Bandeja rápida</h4>
+            <div class="row">
+                <div class="col-lg-4 mb-3">
+                    <div class="card border-warning no-hover h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <strong>Pendientes urgentes</strong>
+                            <span class="badge badge-warning text-dark">{{ pendientes_urgentes|length }}</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0">
+                                    <tbody>
+                                    {% for boleta in pendientes_urgentes|slice(0, 5) %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ boleta.numeroBoleta }}</strong><br>
+                                                <small class="text-muted">{{ boleta.profesional ?: 'Sin carátula' }}</small>
+                                            </td>
+                                            <td class="text-right">
+                                                <a href="{{ path('boleta_editar', {'id': boleta.id}) }}" class="btn btn-sm btn-outline-primary">Abrir</a>
+                                            </td>
+                                        </tr>
+                                    {% else %}
+                                        <tr><td class="text-muted p-3">Sin pendientes urgentes.</td></tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-
+                </div>
+                <div class="col-lg-4 mb-3">
+                    <div class="card border-success no-hover h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <strong>Pagadas sin comprobante</strong>
+                            <span class="badge badge-success">{{ pagadas_sin_comprobante|length }}</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0">
+                                    <tbody>
+                                    {% for boleta in pagadas_sin_comprobante|slice(0, 5) %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ boleta.numeroBoleta }}</strong><br>
+                                                <small class="text-muted">{{ boleta.profesional ?: 'Sin carátula' }}</small>
+                                            </td>
+                                            <td class="text-right">
+                                                <a href="{{ path('boleta_editar', {'id': boleta.id}) }}" class="btn btn-sm btn-outline-success">Subir</a>
+                                            </td>
+                                        </tr>
+                                    {% else %}
+                                        <tr><td class="text-muted p-3">Todo al día.</td></tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-3">
+                    <div class="card border-info no-hover h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <strong>Finalizadas</strong>
+                            <span class="badge badge-info">{{ finalizadas|length }}</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0">
+                                    <tbody>
+                                    {% for boleta in finalizadas|slice(0, 5) %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ boleta.numeroBoleta }}</strong><br>
+                                                <small class="text-muted">{{ boleta.profesional ?: 'Sin carátula' }}</small>
+                                            </td>
+                                            <td class="text-right">
+                                                {% if boleta.hasComprobante %}
+                                                    <a href="{{ path('boleta_archivo_comprobante', {'id': boleta.id}) }}" class="btn btn-sm btn-outline-secondary">Ver comprobante</a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% else %}
+                                        <tr><td class="text-muted p-3">Sin finalizadas.</td></tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    {% endif %}
 
-    </div>
-
-    {% set sessionUser = app.session.get('usuario') %}
-    {% set sessionUsername = sessionUser.username|default(null) %}
-    {% set sessionRoles = sessionUser.roles|default([]) %}
-    {% set isAdmin = 'ROLE_ADMIN' in sessionRoles %}
-
-    <div class="mb-3 d-flex justify-content-between">
-        <div>
-            {# Filtro simple por estado #}
-            <form method="get" action="{{ path('boleta_index') }}" class="form-inline">
-                <select name="estado" class="form-control">
-                    <option value="todos">Todos</option>
-                    {% for label, val in estados %}
-                        <option value="{{ val }}" {% if estado == val %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-                <input type="text" name="q" value="{{ busqueda }}" placeholder="Buscar..." class="form-control ml-2" />
-                <button class="btn btn-outline-primary ml-2">Filtrar</button>
+    <div class="card mb-4 border-info no-hover">
+        <div class="card-body">
+            <form method="get" action="{{ path('boleta_index') }}" class="row align-items-end">
+                <div class="col-md-3 mb-2 mb-md-0">
+                    <label class="small text-muted mb-1">Estado</label>
+                    <select name="estado" class="form-control">
+                        <option value="todos" {% if estado == 'todos' %}selected{% endif %}>Todos</option>
+                        {% for label, val in estados %}
+                            <option value="{{ val }}" {% if estado == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-5 mb-2 mb-md-0">
+                    <label class="small text-muted mb-1">Búsqueda rápida</label>
+                    <input type="text" name="q" value="{{ busqueda }}" placeholder="Número, carátula, creador o archivo..." class="form-control" />
+                </div>
+                <div class="col-md-4 d-flex flex-wrap gap-2">
+                    <button class="btn btn-primary mr-2">Filtrar</button>
+                    <a href="{{ path('boleta_index') }}" class="btn btn-outline-secondary mr-2">Limpiar</a>
+                    <a href="{{ path('boleta_index', {'estado': 'pendiente'}) }}" class="btn btn-outline-warning mr-2">Pendientes</a>
+                    <a href="{{ path('boleta_index', {'estado': 'pagada'}) }}" class="btn btn-outline-success mr-2">Pagadas</a>
+                </div>
             </form>
         </div>
     </div>
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>N° Boleta</th>
-                <th>Profesional</th>
-                <th>Estado</th>
-                <th>Creada por</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for boleta in boletas %}
+    <div class="table-responsive">
+        <table class="table table-hover table-striped align-middle">
+            <thead class="thead-light">
                 <tr>
-                    <td>{{ boleta.id }}</td>
-                    <td>{{ boleta.numeroBoleta }}</td>
-                    <td>{{ boleta.profesional }}</td>
-                    <td>{{ boleta.getEstadoLabel() }}</td>
-                    <td>{{ boleta.createdBy ?: '—' }}</td>
-                    <td>
-                        {% if sessionUsername and (boleta.createdBy == sessionUsername or isAdmin) %}
-                            <a href="{{ path('boleta_editar', {'id': boleta.id}) }}" class="btn btn-sm btn-primary">Editar</a>
-                            <form action="{{ path('boleta_eliminar', {'id': boleta.id}) }}" method="post" style="display:inline" onsubmit="return confirm('¿Confirma eliminar la boleta?');">
-                                <button class="btn btn-sm btn-danger">Eliminar</button>
-                            </form>
-                        {% endif %}
-
-                        {# Cambio de estado (solo admin) #}
-                        {% if isAdmin %}
-                            <form action="{{ path('boleta_estado', {'id': boleta.id}) }}" method="post" style="display:inline; margin-left:6px">
-                                <select name="estado" class="form-control form-control-sm" onchange="this.form.submit()">
-                                    {% for label, val in estados %}
-                                        <option value="{{ val }}" {% if boleta.estado == val %}selected{% endif %}>{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                                <input type="hidden" name="filtro_estado" value="{{ estado }}" />
-                            </form>
-                        {% endif %}
-                    </td>
+                    <th>N° Boleta</th>
+                    <th>Carátula</th>
+                    <th>Vencimiento</th>
+                    <th>Estado</th>
+                    <th>Archivos</th>
+                    <th>Acciones</th>
                 </tr>
-            {% else %}
-                <tr>
-                    <td colspan="6">No hay boletas.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% for boleta in boletas %}
+                    {% set currentEstado = boleta.estado|lower %}
+                    {% set estadoSeleccionado = currentEstado in ['subida', 'comprobante_subido', 'finalizada'] ? 'pagada' : (currentEstado in ['detenida', 'en_proceso'] ? 'pendiente' : currentEstado) %}
+                    <tr>
+                        <td>{{ boleta.id }}</td>
+                        <td>
+                            <strong>{{ boleta.numeroBoleta }}</strong>
+                            {% if boleta.createdBy %}
+                                <br><small class="text-muted">Cargada por {{ boleta.createdBy }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if boleta.fechaVencimiento %}
+                                {{ boleta.fechaVencimiento|date('d/m/Y') }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge {{ boleta.estadoBadgeClass }}">{{ boleta.estadoLabel }}</span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                {% if boleta.hasArchivoOriginal %}
+                                    <a href="{{ path('boleta_archivo_original', {'id': boleta.id}) }}" class="btn btn-outline-primary">Ver PDF</a>
+                                {% endif %}
+                                {% if boleta.hasComprobante %}
+                                    <a href="{{ path('boleta_archivo_comprobante', {'id': boleta.id}) }}" class="btn btn-outline-success">Descargar comprobante</a>
+                                {% endif %}
+                                {% if not boleta.hasArchivoOriginal and not boleta.hasComprobante %}
+                                    <span class="text-muted">Sin archivos</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="text-right">
+                            <div class="btn-group btn-group-sm flex-wrap" role="group">
+                                {% if is_granted('BOLETA_EDIT', boleta) %}
+                                    <a href="{{ path('boleta_editar', {'id': boleta.id}) }}" class="btn btn-primary">Editar</a>
+                                {% endif %}
+                                {% if is_granted('BOLETA_DELETE', boleta) %}
+                                    <form action="{{ path('boleta_eliminar', {'id': boleta.id}) }}" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar esta boleta?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('boleta_cancelar_' ~ boleta.id) }}" />
+                                        <button class="btn btn-danger">Eliminar</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">No hay boletas para mostrar.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
 {% endblock %}

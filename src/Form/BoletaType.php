@@ -4,16 +4,14 @@ namespace App\Form;
 
 use App\Entity\Boleta;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class BoletaType extends AbstractType
 {
@@ -28,47 +26,72 @@ class BoletaType extends AbstractType
                 ],
                 'attr' => ['class' => 'form-control']
             ])
-            ->add('expediente', TextType::class, [
-                'label'    => 'Expediente',
-                'required' => false,
-                'attr'     => ['class' => 'form-control']
-            ])
             ->add('profesional', TextType::class, [
-                'label'       => 'Profesional',
+                'label'       => 'Carátula',
                 'constraints' => [
-                    new NotBlank(['message' => 'El profesional es obligatorio.']),
-                    new Length(['max' => 50]),
+                    new NotBlank(['message' => 'La carátula es obligatoria.']),
+                    new Length(['max' => 255]),
                 ],
                 'attr' => ['class' => 'form-control']
             ])
             ->add('fechaVencimiento', DateType::class, [
-                'label'    => 'Fecha vencimiento',
+                'label'    => 'Vencimiento',
                 'required' => false,
                 'widget'   => 'single_text',
                 'html5'    => true,
                 'attr'     => ['class' => 'form-control']
             ])
-            ->add('emailProfesional', EmailType::class, [
-                'label'    => 'Email profesional',
+            ->add('archivoOriginal', FileType::class, [
+                'label' => 'PDF / imagen de la boleta',
+                'mapped' => false,
+                'required' => (bool) $options['require_original_file'],
                 'constraints' => [
-                    new Length(['max' => 50]),
+                    new File([
+                        'maxSize' => '10M',
+                        'mimeTypes' => [
+                            'application/pdf',
+                            'image/jpeg',
+                            'image/png',
+                            'image/webp',
+                        ],
+                        'mimeTypesMessage' => 'Subí un PDF o una imagen válida (JPG, PNG o WEBP).',
+                    ]),
                 ],
-                'attr' => ['class' => 'form-control']
+                'help' => 'Se guarda localmente en el sistema y queda disponible para ver/descargar.',
             ])
-            ->add('observaciones', TextareaType::class, [
-                'label'    => 'Observaciones',
+        ;
+
+        if (!empty($options['show_comprobante_upload'])) {
+            $builder->add('comprobantePago', FileType::class, [
+                'label' => 'Comprobante de pago',
+                'mapped' => false,
                 'required' => false,
-                'attr'     => [
-                    'placeholder' => 'Notas, aclaraciones…',
-                    'class' => 'form-control'
+                'constraints' => [
+                    new File([
+                        'maxSize' => '10M',
+                        'mimeTypes' => [
+                            'application/pdf',
+                            'image/jpeg',
+                            'image/png',
+                            'image/webp',
+                        ],
+                        'mimeTypesMessage' => 'Subí un PDF o una imagen válida (JPG, PNG o WEBP).',
+                    ]),
                 ],
+                'help' => 'Al subirlo, la boleta puede marcarse como pagada.',
             ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Boleta::class,
+            'require_original_file' => true,
+            'show_comprobante_upload' => false,
         ]);
+
+        $resolver->setAllowedTypes('require_original_file', 'bool');
+        $resolver->setAllowedTypes('show_comprobante_upload', 'bool');
     }
 }

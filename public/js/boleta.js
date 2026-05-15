@@ -14,7 +14,6 @@ function validBoletaForm() {
         prev.forEach(function(el){ el.remove(); });
 
         var ok = true;
-        var ok = true;
         function showError(el, msg) {
             if (!el) return;
             var bubble = document.createElement('div');
@@ -30,7 +29,7 @@ function validBoletaForm() {
         }
 
         if (profesional && profesional.value.trim() === '') {
-            showError(profesional, 'El profesional es obligatorio');
+            showError(profesional, 'La carátula es obligatoria');
         }
 
         if (email && email.value.trim() !== '') {

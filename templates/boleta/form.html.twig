@@ -28,7 +28,6 @@
     </div>
 {% endfor %}
 
-{# Primera fila: número_boleta / expediente / fecha vencimiento #}
 <div class="row mb-3 align-items-start">
     <div class="col-md-4">
         <div class="form-group">
@@ -39,9 +38,9 @@
     </div>
     <div class="col-md-4">
         <div class="form-group">
-            {{ form_label(form.expediente) }}
-            {{ form_widget(form.expediente, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.expediente) }}
+            {{ form_label(form.profesional) }}
+            {{ form_widget(form.profesional, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.profesional) }}
         </div>
     </div>
     <div class="col-md-4">
@@ -53,32 +52,43 @@
     </div>
 </div>
 
-{# Segunda fila: profesional / email / observaciones #}
 <div class="row mb-3 align-items-start">
-    <div class="col-md-4">
-        <div class="form-group">
-            {{ form_label(form.profesional) }}
-            {{ form_widget(form.profesional, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.profesional) }}
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="form-group">
-            {{ form_label(form.emailProfesional) }}
-            {{ form_widget(form.emailProfesional, {'attr': {'class': 'form-control', 'type': 'email'}}) }}
-            {{ form_errors(form.emailProfesional) }}
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="form-group">
-            {{ form_label(form.observaciones) }}
-            {{ form_widget(form.observaciones, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.observaciones) }}
+    <div class="col-md-12">
+        <div class="alert alert-light border">
+            <div class="font-weight-bold mb-2">Archivo principal</div>
+            {{ form_label(form.archivoOriginal) }}
+            {{ form_widget(form.archivoOriginal, {'attr': {'class': 'form-control-file'}}) }}
+            {{ form_errors(form.archivoOriginal) }}
+
+            {% if boleta and boleta.hasArchivoOriginal %}
+                <div class="mt-2">
+                    <a href="{{ path('boleta_archivo_original', {'id': boleta.id}) }}" class="btn btn-sm btn-outline-primary">Ver PDF / imagen actual</a>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
 
-<div class="text-end mt-4">
+{% if form.comprobantePago is defined %}
+    <div class="row mb-3 align-items-start">
+        <div class="col-md-12">
+            <div class="alert alert-light border">
+                <div class="font-weight-bold mb-2">Comprobante de pago</div>
+                {{ form_label(form.comprobantePago) }}
+                {{ form_widget(form.comprobantePago, {'attr': {'class': 'form-control-file'}}) }}
+                {{ form_errors(form.comprobantePago) }}
+
+                {% if boleta and boleta.hasComprobante %}
+                    <div class="mt-2">
+                        <a href="{{ path('boleta_archivo_comprobante', {'id': boleta.id}) }}" class="btn btn-sm btn-outline-success">Descargar comprobante actual</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<div class="text-right mt-4">
     <a href="{{ path('boleta_index') }}" class="btn btn-outline-secondary">Cancelar</a>
     <button type="submit" class="btn btn-primary">{{ boleta and boleta.id ? 'Actualizar' : 'Guardar' }}</button>
 </div>
